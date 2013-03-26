@@ -3,15 +3,14 @@
 
 #include <QFileSystemModel>
 #include <QScrollBar>
+#include <QAbst>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    QFileSystemModel *model = new QFileSystemModel(this);
-    model->setRootPath("");
+    QItemModel
 
     ui->treeView_1->setModel(model);
     ui->treeView_2->setModel(model);
