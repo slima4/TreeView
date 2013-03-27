@@ -14,9 +14,23 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    itemmodel.cpp
+    itemmodel.cpp \
+    item.cpp \
+    checkboxdelegate.cpp \
+    stardelegate.cpp \
+    stareditor.cpp \
+    starrating.cpp \
+    progressdelegate.cpp \
+    progress.cpp
 
 HEADERS  += mainwindow.h \
-    itemmodel.h
+    itemmodel.h \
+    item.h \
+    checkboxdelegate.h \
+    stardelegate.h \
+    stareditor.h \
+    starrating.h \
+    progressdelegate.h \
+    progress.h
 
 FORMS    += mainwindow.ui
