@@ -29,7 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     for(int i = 0; i < 100; ++i)
     {
+        QStandardItem *parent = new QStandardItem(QString("test_%1").arg(i));
+        parent->setData();
         model->insertRow(0);
+        model->appendRow(parent);
         model->setData(model->index(0, 0), QString("%1%").arg(i));
         model->setData(model->index(0, 1), QString("%1%").arg(i));
         model->setData(model->index(0, 2), QString("%1%").arg(i));
@@ -39,7 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
         model->setData(model->index(0, 6), QVariant::fromValue(CProgressItem()));
         model->setData(model->index(0, 7), QVariant::fromValue(CCheckBoxItem()));
     }
-
 
     ui->treeView_1->setModel(model);
     ui->treeView_1->setItemDelegate(new CCheckBoxDelegate);
@@ -52,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->treeView_2->verticalScrollBar(), SIGNAL(valueChanged(int)),
             ui->treeView_1->verticalScrollBar(), SLOT(setValue(int)));
+    connect(ui->treeView_1->verticalScrollBar(), SIGNAL(valueChanged(int)),
+            ui->treeView_2->verticalScrollBar(), SLOT(setValue2(int)));
 
     connect(ui->treeView_2, SIGNAL(expanded(QModelIndex)), SLOT(onExpanded(QModelIndex)));
     connect(ui->treeView_2, SIGNAL(collapsed(QModelIndex)), SLOT(onCollapsed(QModelIndex)));
@@ -70,6 +74,11 @@ MainWindow::~MainWindow()
 void MainWindow::setValue(int value)
 {
     ui->treeView_1->verticalScrollBar()->setValue(value);
+}
+
+void MainWindow::setValue2(int value)
+{
+    ui->treeView_2->verticalScrollBar()->setValue(value);
 }
 
 void MainWindow::onExpanded(const QModelIndex &model)

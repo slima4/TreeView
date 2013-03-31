@@ -18,6 +18,7 @@ public:
 
 public slots:
     void setValue(int);
+    void setValue2(int);
     void onExpanded(const QModelIndex &);
     void onCollapsed(const QModelIndex &);
     
