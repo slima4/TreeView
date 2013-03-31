@@ -15,7 +15,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     itemmodel.cpp \
-    item.cpp \
     checkboxdelegate.cpp \
     progressdelegate.cpp \
     checkboxitem.cpp \
@@ -23,7 +22,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     itemmodel.h \
-    item.h \
     checkboxdelegate.h \
     progressdelegate.h \
     checkboxitem.h \
