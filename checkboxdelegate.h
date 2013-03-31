@@ -14,8 +14,6 @@ class CCheckBoxDelegate : public QStyledItemDelegate
 public:
     CCheckBoxDelegate(QObject *parent = 0);
 
-    QPoint closeIconPos(const QStyleOptionViewItem &option) const;
-
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const;
 
@@ -25,14 +23,6 @@ public:
     bool editorEvent(QEvent *event, QAbstractItemModel *model,
                      const QStyleOptionViewItem &option,
                      const QModelIndex &index);
-signals:
-    void closeIndexClicked(const QModelIndex &);
-
-private:
-    bool _isChecked;
-    QPolygonF starPolygon;
-    QPixmap m_closeIcon;
-    static const int margin = 2; // pixels to keep arount the icon
 };
 
 #endif // CHECKBOXDELEGATE_H

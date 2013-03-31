@@ -17,20 +17,16 @@ SOURCES += main.cpp\
     itemmodel.cpp \
     item.cpp \
     checkboxdelegate.cpp \
-    stardelegate.cpp \
-    stareditor.cpp \
-    starrating.cpp \
     progressdelegate.cpp \
-    progress.cpp
+    checkboxitem.cpp \
+    progressitem.cpp
 
 HEADERS  += mainwindow.h \
     itemmodel.h \
     item.h \
     checkboxdelegate.h \
-    stardelegate.h \
-    stareditor.h \
-    starrating.h \
     progressdelegate.h \
-    progress.h
+    checkboxitem.h \
+    progressitem.h
 
 FORMS    += mainwindow.ui

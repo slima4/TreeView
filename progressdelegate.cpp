@@ -1,45 +1,33 @@
 #include <qmath.h>
 
 #include "progressdelegate.h"
-#include "progress.h"
+#include "progressitem.h"
+
+#include <QDebug>
+#include <QApplication>
 
 const int PaintingScaleFactor = 20;
 
 CProgressDelegate::CProgressDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
 {
-    starPolygon << QPointF(1.0, 0.5);
-    for (int i = 1; i < 5; ++i)
-        starPolygon << QPointF(0.5 + 0.5 * cos(0.8 * i * 3.14),
-                               0.5 + 0.5 * sin(0.8 * i * 3.14));
-}
-
-QPoint CProgressDelegate::closeIconPos(const QStyleOptionViewItem &option) const {
-    return QPoint(option.rect.right() - 2,
-                  option.rect.center().y());
 }
 
 void CProgressDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-           const QModelIndex &index) const {
-    if (index.data().canConvert<CProgress>()) {
-        if (option.state & QStyle::State_Selected)
-            painter->fillRect(option.rect, option.palette.highlight());
+           const QModelIndex &index) const
+{
+    if (index.data().canConvert<CProgressItem>())
+    {
+        CProgressItem progress = qvariant_cast<CProgressItem>(index.data());
+        QRect buttonRect( option.rect);
+        buttonRect.setHeight( 30);
+        QStyleOptionProgressBar button;
+        button.rect = buttonRect;
+        button.state = QStyle::State_Enabled;
+        button.maximum = 100;
+        button.progress = progress.value();
 
-        painter->save();
-
-        painter->setRenderHint(QPainter::Antialiasing, true);
-        painter->setPen(Qt::NoPen);
-
-        painter->setBrush(option.palette.foreground());
-
-        int yOffset = (option.rect.height() - PaintingScaleFactor) / 2;
-        painter->translate(option.rect.x(), option.rect.y() + yOffset);
-        painter->scale(PaintingScaleFactor, PaintingScaleFactor);
-        painter->drawPolygon(starPolygon, Qt::WindingFill);
-        //painter->drawRect(10,10,10,10);
-        painter->translate(1.0, 0.0);
-
-        painter->restore();
+        QApplication::style()->drawControl(QStyle::CE_ProgressBar, &button, painter);
     } else {
         QStyledItemDelegate::paint(painter, option, index);
     }
@@ -57,19 +45,10 @@ bool CProgressDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
                  const QStyleOptionViewItem &option,
                  const QModelIndex &index)
 {
-    // Emit a signal when the icon is clicked
-    if(!index.parent().isValid() &&
-            event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+    Q_UNUSED(event);
+    Q_UNUSED(model);
+    Q_UNUSED(option);
+    Q_UNUSED(index);
 
-//        QRect closeButtonRect = m_closeIcon.rect()
-//                .translated(closeIconPos(option));
-
-//        if(closeButtonRect.contains(mouseEvent->pos()))
-//        {
-//            emit closeIndexClicked(index);
-//        }
-        return true;
-    }
-    return false;
+    return true;
 }
