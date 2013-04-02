@@ -29,20 +29,66 @@ MainWindow::MainWindow(QWidget *parent) :
 
     for(int i = 0; i < 100; ++i)
     {
-        QStandardItem *parent = new QStandardItem(QString("test_%1").arg(i));
-        parent->setData();
-        model->insertRow(0);
-        model->appendRow(parent);
-        model->setData(model->index(0, 0), QString("%1%").arg(i));
-        model->setData(model->index(0, 1), QString("%1%").arg(i));
-        model->setData(model->index(0, 2), QString("%1%").arg(i));
-        model->setData(model->index(0, 3), QString("%1%").arg(i));
-        model->setData(model->index(0, 4), QString("%1%").arg(i));
-        model->setData(model->index(0, 5), QString("%1%").arg(i));
-        model->setData(model->index(0, 6), QVariant::fromValue(CProgressItem()));
-        model->setData(model->index(0, 7), QVariant::fromValue(CCheckBoxItem()));
-    }
+        QList<QStandardItem*> rootItems;
+        rootItems << new QStandardItem(QString("1total_%1").arg(i));;
+        rootItems << new QStandardItem(QString("2total_%1").arg(i));
 
+        rootItems << new QStandardItem(QString("3total_%1").arg(i));
+        rootItems << new QStandardItem(QString("4total_%1").arg(i));
+        rootItems << new QStandardItem(QString("5total_%1").arg(i));
+        rootItems << new QStandardItem(QString("6total_%1").arg(i));
+        QStandardItem *root;
+        root = new QStandardItem();
+        root->setData(QVariant::fromValue(CProgressItem()), Qt::DisplayRole);
+        rootItems << root;
+        root = new QStandardItem();
+        root->setData(QVariant::fromValue(CCheckBoxItem()));
+        rootItems << root;
+
+        for(int j = 0; j < 10; ++j)
+        {
+            QStandardItem* child1 = new QStandardItem();
+            child1->setData(QVariant::fromValue(CProgressItem()), Qt::DisplayRole);
+
+            QStandardItem* child2 = new QStandardItem();
+            child2->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
+
+            rootItems.first()->appendRow(QList<QStandardItem*>() <<
+                              new QStandardItem(QString("%1%").arg(i)) <<
+                              new QStandardItem(QString("%1%").arg(i)) <<
+                              new QStandardItem(QString("%1%").arg(i)) <<
+                              new QStandardItem(QString("%1%").arg(i)) <<
+                              new QStandardItem(QString("%1%").arg(i)) <<
+                              new QStandardItem(QString("%1%").arg(i)) <<
+                              child1 <<
+                              child2);
+        }
+
+        //model->insertRow(0);
+        model->appendRow(rootItems);
+//        QStandardItem *item = new QStandardItem(QString("total_%1").arg(i));
+
+//        item->appendRow(QList<QStandardItem*>() <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)) <<
+//                        new QStandardItem(QString("%1%").arg(i)));
+//        model->insertRow(0);
+//        model->appendRow(QList<QStandardItem*>() << item << new QStandardItem("test"));
+
+//        model->setData(model->index(0, 0), QString("%1%").arg(i));
+//        model->setData(model->index(0, 1), QString("%1%").arg(i));
+//        model->setData(model->index(0, 2), QString("%1%").arg(i));
+//        model->setData(model->index(0, 3), QString("%1%").arg(i));
+//        model->setData(model->index(0, 4), QString("%1%").arg(i));
+//        model->setData(model->index(0, 5), QString("%1%").arg(i));
+//        model->setData(model->index(0, 6), QVariant::fromValue(CProgressItem()));
+//        model->setData(model->index(0, 7), QVariant::fromValue(CCheckBoxItem()));
+    }
     ui->treeView_1->setModel(model);
     ui->treeView_1->setItemDelegate(new CCheckBoxDelegate);
     ui->treeView_2->setModel(model);
