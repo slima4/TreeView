@@ -25,6 +25,7 @@ HEADERS  += mainwindow.h \
     checkboxdelegate.h \
     progressdelegate.h \
     checkboxitem.h \
-    progressitem.h
+    progressitem.h \
+    colormodel.h
 
 FORMS    += mainwindow.ui

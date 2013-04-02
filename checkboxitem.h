@@ -7,6 +7,12 @@ class CCheckBoxItem
 {
 public:
     CCheckBoxItem();
+
+    bool isChecked();
+    void checked(bool);
+
+private:
+    bool _isChecked;
 };
 
 Q_DECLARE_METATYPE(CCheckBoxItem)

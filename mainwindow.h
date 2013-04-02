@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QModelIndex>
 
+#include "colormodel.h"
 namespace Ui {
 class MainWindow;
 }
@@ -21,9 +22,11 @@ public slots:
     void setValue2(int);
     void onExpanded(const QModelIndex &);
     void onCollapsed(const QModelIndex &);
+    void onCheckBoxClicked(const QModelIndex &);
     
 private:
     Ui::MainWindow *ui;
+    CColorModel *_model;
 };
 
 #endif // MAINWINDOW_H

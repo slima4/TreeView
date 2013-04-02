@@ -11,13 +11,13 @@ CCheckBoxDelegate::CCheckBoxDelegate(QObject *parent)
 
 void CCheckBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
            const QModelIndex &index) const {
-    if (index.data().canConvert<CCheckBoxItem>()) {
-        QRect buttonRect( option.rect);
-        buttonRect.setHeight( 30);
+    if (index.data().canConvert<CCheckBoxItem>())
+    {
         QStyleOptionButton button;
-        button.rect = buttonRect;
+        button.rect = option.rect;
         button.state |= QStyle::State_Enabled;
-        button.state |= QStyle::State_On;
+        bool checked = index.data(Qt::UserRole).toBool();
+        button.state |= checked?QStyle::State_On:QStyle::State_Off;
 
         QApplication::style()->drawControl(QStyle::CE_CheckBox, &button, painter);
     } else {
