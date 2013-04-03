@@ -1,5 +1,6 @@
 #include "progressitem.h"
 
-CProgressItem::CProgressItem()
+CProgressItem::CProgressItem():
+    _value(0)
 {
 }

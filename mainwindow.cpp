@@ -18,8 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    _model = new CColorModel(/*0,8,*/this);
-    _model->insertColumns(0, 8);
+    _model = new CColorModel(/*0,7,*/this);
+    _model->insertColumns(0, 7);
 
     _model->setHeaderData(0, Qt::Horizontal, QObject::tr("Products"));
     _model->setHeaderData(1, Qt::Horizontal, QObject::tr("Total"));
@@ -28,7 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _model->setHeaderData(4, Qt::Horizontal, QObject::tr("Midwest"));
     _model->setHeaderData(5, Qt::Horizontal, QObject::tr("West"));
     _model->setHeaderData(6, Qt::Horizontal, QObject::tr(""));
-    _model->setHeaderData(7, Qt::Horizontal, QObject::tr("Available"));
 
     for(int i = 0; i < 100; ++i)
     {
@@ -39,33 +38,35 @@ MainWindow::MainWindow(QWidget *parent) :
         int total = 0;
         for(int j = 0; j < 10; ++j)
         {
+            int rand = qrand()%10;
             QStandardItem* child1 = new QStandardItem();
-            child1->setData(QVariant::fromValue(CProgressItem()), Qt::DisplayRole);
+            child1->setData(QVariant::fromValue(CProgressItem(rand)), Qt::DisplayRole);
+            child1->setData(QString("%1%").arg(rand), Qt::UserRole);
+//            child1->setData();
 
             QStandardItem* child2 = new QStandardItem();
             child2->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
-            child2->setData(false, Qt::UserRole);
+            child2->setData(true, Qt::UserRole);
 
             rootItems.first()->appendRow(QList<QStandardItem*>() <<
-                              new QStandardItem(QString("Product_%1").arg(j)) <<
-                              new QStandardItem(QString("%1%").arg(j)) <<
-                              new QStandardItem(QString("%1%").arg(j)) <<
-                              new QStandardItem(QString("%1%").arg(j)) <<
-                              new QStandardItem(QString("%1%").arg(j)) <<
-                              new QStandardItem(QString("%1%").arg(j)) <<
+                              new QStandardItem(QString("Product_%1").arg(rand)) <<
                               child1 <<
+                              new QStandardItem(QString("%1%").arg(rand)) <<
+                              new QStandardItem(QString("%1%").arg(rand)) <<
+                              new QStandardItem(QString("%1%").arg(rand)) <<
+                              new QStandardItem(QString("%1%").arg(rand)) <<
                               child2);
-            total += j;
+            total += rand;
         }
 
-        rootItems << new QStandardItem(QString("%1% Total").arg(total));
-
-        rootItems << new QStandardItem(QString("%1% Total").arg(total));
-        rootItems << new QStandardItem(QString("%1% Total").arg(total));
-        rootItems << new QStandardItem(QString("%1% Total").arg(total));
-        rootItems << new QStandardItem(QString("%1% Total").arg(total));
         rootItems << new QStandardItem();
-        rootItems.last()->setData(QVariant::fromValue(CProgressItem()), Qt::DisplayRole);
+        rootItems.last()->setData(QVariant::fromValue(CProgressItem(total)), Qt::DisplayRole);
+        rootItems.last()->setData(QString("%1%").arg(total), Qt::UserRole);
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems << new QStandardItem(QString("%1%").arg(total));
         rootItems << new QStandardItem();
 
         _model->appendRow(rootItems);
@@ -76,8 +77,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView_2->setItemDelegate(new CProgressDelegate);
     for(int i = 0; i < ui->treeView_1->model()->columnCount(); ++i)
         ui->treeView_1->hideColumn(i);
-    ui->treeView_1->showColumn(7);
-    ui->treeView_2->hideColumn(7);
+    ui->treeView_1->showColumn(6);
+    ui->treeView_2->hideColumn(6);
 
     connect(ui->treeView_1, SIGNAL(clicked(QModelIndex)), SLOT(onCheckBoxClicked(QModelIndex)));
     connect(ui->treeView_2->verticalScrollBar(), SIGNAL(valueChanged(int)),
@@ -125,16 +126,17 @@ void MainWindow::onCheckBoxClicked(const QModelIndex &model)
     ui->treeView_1->model()->setData(model, !checked, Qt::UserRole);
     QModelIndex parentModel = model.parent();
 
-    for(int col = 0; col < 8; ++col)
+    for(int col = 1; col <= 5; ++col)
     {
-        for(int row = 1; row <= 5; ++row)
+        for(int row = 0; row < 10; ++row)
         {
             qDebug() << parentModel.child(row, col).data().toString();
         }
+        qDebug() << "<<<<<<<<<<<<<<";
     }
 
 //    int c = root.row();
-    for(int i = 0; i < 8; ++i)
+    for(int i = 0; i < 7; ++i)
     {
 
     }

@@ -7,8 +7,14 @@ class CProgressItem
 {
 public:
     CProgressItem();
+    CProgressItem(int value) :
+        _value(value)
+    {}
 
-    int value() { return 10; }
+    int value() { return _value; }
+
+private:
+    int _value;
 };
 
 Q_DECLARE_METATYPE(CProgressItem)

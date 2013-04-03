@@ -5,9 +5,12 @@
 
 #include <QDebug>
 #include <QApplication>
+#include <QStandardItem>
 
-const int PaintingScaleFactor = 20;
-
+namespace {
+    const int PaintingScaleFactor = 20;
+    const int TEXT_POS = -30;
+}
 CProgressDelegate::CProgressDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
 {
@@ -18,8 +21,15 @@ void CProgressDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 {
     if (index.data().canConvert<CProgressItem>())
     {
+        QString text = index.data(Qt::UserRole).toString();
+        QRect textRect(option.rect);
+        textRect.adjust(textRect.width() + TEXT_POS,0,0,0);
+        painter->drawText(textRect, text);
+
         CProgressItem progress = qvariant_cast<CProgressItem>(index.data());
-        QRect buttonRect( option.rect);
+        QRect progressBarRect(option.rect);
+        progressBarRect.adjust(0,0,TEXT_POS-5,0);
+        QRect buttonRect(progressBarRect);
         buttonRect.setHeight( 30);
         QStyleOptionProgressBar button;
         button.rect = buttonRect;
