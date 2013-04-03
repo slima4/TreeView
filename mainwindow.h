@@ -17,6 +17,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    static const int CellValue = Qt::UserRole + 100;
+
 public slots:
     void setValue(int);
     void setValue2(int);

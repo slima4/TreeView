@@ -38,23 +38,34 @@ MainWindow::MainWindow(QWidget *parent) :
         int total = 0;
         for(int j = 0; j < 10; ++j)
         {
-            int rand = qrand()%10;
+            int rand = qrand()%10+1;
             QStandardItem* child1 = new QStandardItem();
             child1->setData(QVariant::fromValue(CProgressItem(rand)), Qt::DisplayRole);
             child1->setData(QString("%1%").arg(rand), Qt::UserRole);
-//            child1->setData();
+            child1->setData(rand, CellValue);
 
             QStandardItem* child2 = new QStandardItem();
             child2->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
             child2->setData(true, Qt::UserRole);
 
+
+            QStandardItem *item1 = new QStandardItem(QString("Product_%1").arg(j));
+            item1->setData(rand, CellValue);
+            QStandardItem *item2 = new QStandardItem(QString("%1%").arg(rand));
+            item2->setData(rand, CellValue);
+            QStandardItem *item3 = new QStandardItem(QString("%1%").arg(rand));
+            item3->setData(rand, CellValue);
+            QStandardItem *item4 = new QStandardItem(QString("%1%").arg(rand));
+            item4->setData(rand, CellValue);
+            QStandardItem *item5 = new QStandardItem(QString("%1%").arg(rand));
+            item5->setData(rand, CellValue);
             rootItems.first()->appendRow(QList<QStandardItem*>() <<
-                              new QStandardItem(QString("Product_%1").arg(rand)) <<
+                              item1 <<
                               child1 <<
-                              new QStandardItem(QString("%1%").arg(rand)) <<
-                              new QStandardItem(QString("%1%").arg(rand)) <<
-                              new QStandardItem(QString("%1%").arg(rand)) <<
-                              new QStandardItem(QString("%1%").arg(rand)) <<
+                              item2 <<
+                              item3 <<
+                              item4 <<
+                              item5 <<
                               child2);
             total += rand;
         }
@@ -124,28 +135,51 @@ void MainWindow::onCheckBoxClicked(const QModelIndex &model)
 {
     bool checked = model.data(Qt::UserRole).toBool();
     ui->treeView_1->model()->setData(model, !checked, Qt::UserRole);
+
     QModelIndex parentModel = model.parent();
 
     for(int col = 1; col <= 5; ++col)
     {
+        qint32 total = 0;
+        if(checked)
+        {
+            _model->setData(parentModel.child(model.row(), col), 0, CellValue);
+            if(col == 1)
+            {
+                _model->setData(parentModel.child(model.row(), col),QString("%1%").arg(0), Qt::UserRole);
+            }
+            else
+            {
+                _model->setData(parentModel.child(model.row(), col), QString("%1%").arg(0));
+            }
+        }
+        else
+        {
+            qint32 rand = (qrand()%10 + 1);
+            if(col == 1)
+            {
+                _model->setData(parentModel.child(model.row(), col),QString("%1%").arg(rand), Qt::UserRole);
+            }
+            else
+            {
+                _model->setData(parentModel.child(model.row(), col), QString("%1%").arg(rand));
+            }
+            _model->setData(parentModel.child(model.row(), col), rand, CellValue);
+        }
         for(int row = 0; row < 10; ++row)
         {
-            qDebug() << parentModel.child(row, col).data().toString();
+            total += parentModel.child(row, col).data(CellValue).toInt();
         }
-        qDebug() << "<<<<<<<<<<<<<<";
+        if(col == 1)
+        {
+            _model->setData(_model->index(parentModel.row(), col), QString("%1%").arg(total), Qt::UserRole);
+        }
+        else
+        {
+            _model->setData(_model->index(parentModel.row(), col), QString("%1%").arg(total));
+        }
+        qDebug() << "total = " << total;
     }
-
-//    int c = root.row();
-    for(int i = 0; i < 7; ++i)
-    {
-
-    }
-//    QList<QStandardItem*> items = _model->takeRow(model.row());
-////    QStandardItem *item = items[model.row()-1];
-//    for(int i = 0; i < 8; ++i)
-//    {
-//        _model->setData(_model->indexFromItem(items[i]), !checked?QBrush(Qt::blue):QBrush(), Qt::BackgroundRole);
-//    }
 }
 
 
