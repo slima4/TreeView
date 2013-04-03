@@ -5,43 +5,142 @@
 #include <QScrollBar>
 #include <QStandardItemModel>
 #include <qDebug>
+#include <QMap>
+#include <QPair>
 
 #include "checkboxdelegate.h"
 #include "checkboxitem.h"
 #include "progressitem.h"
 #include "progressdelegate.h"
 
+//#define NEW_MODEL
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+#ifdef NEW_MODEL
+    QList<QStringList> lines;
+    QFile file("db/SampleProjectDataset_1.csv");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        while (!file.atEnd())
+        {
+            QString line = file.readLine();
+            line.chop(1);
+            lines.push_back(QStringList() << line.split(","));
+        }
+        file.close();
+    }
 
-    _model = new CColorModel(/*0,7,*/this);
+    const qint32 OFFSET_COLUMN_BEGIT = 2;
+    const qint32 OFFSET_COLUMN_END = 2;
+    const qint32 COLUMNS_COUNT = lines.at(1).size()-OFFSET_COLUMN_END - 1;
+    const qint32 ROWS_COUNT = lines.length() - 2;
+    const qint32 GROUP_COLUMN = 1;
+
+    const qint32 CHAR_LENG = 3;
+
+    _model = new CColorModel(this);
+    _model->insertColumns(0, COLUMNS_COUNT);
+
+    for(int i = OFFSET_COLUMN_BEGIT; i <= COLUMNS_COUNT; ++i)
+    {
+        _model->setHeaderData(i-OFFSET_COLUMN_BEGIT, Qt::Horizontal, lines.at(1).at(i));
+    }
+    // last row for checkboxs
+    _model->setHeaderData(COLUMNS_COUNT - 1, Qt::Horizontal, "");
+
+    QMap<QString, QString> groupMap;
+    { // GET_GROUP
+        int group_column = 0;
+        bool founded = false;
+        for(int col = 0; col < lines.at(1).count(); ++col)
+        {
+            if(lines.at(1).at(col).compare("Group (Brand)",Qt::CaseInsensitive) == 0)
+            {
+                founded = true;
+                group_column = col;
+                break;
+            }
+        }
+        if(founded)
+        {
+            qint32 OFFSET_DATA_BEGIN = 2;
+            for(int row = OFFSET_DATA_BEGIN; row < lines.count(); ++row)
+            {
+                if(lines.at(row).at(group_column).isEmpty() || lines.at(row).at(group_column+1).isEmpty())
+                    break;
+                groupMap.insert(lines.at(row).at(group_column), lines.at(row).at(group_column+1));
+            }
+        }
+    }
+
+    QString currentName;
+    for(int i = OFFSET_COLUMN_BEGIT; i < ROWS_COUNT + OFFSET_COLUMN_BEGIT; ++i)
+    {
+        // add ROOT
+        QList<QStandardItem*> rootItems;
+        if(currentName.compare(groupMap[lines.at(i).at(GROUP_COLUMN)], Qt::CaseSensitive) != 0)
+        {
+            currentName = groupMap[lines.at(i).at(GROUP_COLUMN)];
+            rootItems << new QStandardItem(currentName);
+        }
+        int total = 0;
+        // add CHILD
+        while (i < lines.count() && currentName.compare(groupMap[lines.at(i).at(GROUP_COLUMN)], Qt::CaseSensitive) == 0)
+        {
+            QStandardItem* child1 = new QStandardItem();
+            double value = lines.at(i).at(GROUP_COLUMN + 2).toDouble() * 100;
+            child1->setData(QVariant::fromValue(CProgressItem(value, QString("%1%").arg(QString::number(value, 'g', 2)))), Qt::DisplayRole);
+            child1->setData(value, CellValue);
+
+            QStandardItem* child2 = new QStandardItem();
+            child2->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
+            child2->setData(true, Qt::UserRole);
+
+
+            QStandardItem *item1 = new QStandardItem(lines.at(i).at(GROUP_COLUMN + 1));
+
+            QList<QStandardItem*> rows;
+            rows << item1;
+            rows << child1;
+            for(int k = 3; k < 15; ++k)
+            {
+                value = lines.at(i).at(GROUP_COLUMN + k).toDouble() * 100;
+                QStandardItem *item2 = new QStandardItem(QString("%1%").arg(QString::number(value, 'g', 2)));
+                item2->setData(value, CellValue);
+                rows << item2;
+            }
+            rows << child2;
+            rootItems.first()->appendRow(rows);
+            total += 1;
+            ++i;
+        }
+        rootItems << new QStandardItem();
+        rootItems.last()->setData(QVariant::fromValue(CProgressItem(total, QString("%1%").arg(total))), Qt::DisplayRole);
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems << new QStandardItem();
+        _model->appendRow(rootItems);
+    }
+#else
+    _model = new CColorModel(this);
     _model->insertColumns(0, 7);
-
-    _model->setHeaderData(0, Qt::Horizontal, QObject::tr("Products"));
-    _model->setHeaderData(1, Qt::Horizontal, QObject::tr("Total"));
-    _model->setHeaderData(2, Qt::Horizontal, QObject::tr("Northeast"));
-    _model->setHeaderData(3, Qt::Horizontal, QObject::tr("Southeast"));
-    _model->setHeaderData(4, Qt::Horizontal, QObject::tr("Midwest"));
-    _model->setHeaderData(5, Qt::Horizontal, QObject::tr("West"));
-    _model->setHeaderData(6, Qt::Horizontal, QObject::tr(""));
-
     for(int i = 0; i < 100; ++i)
     {
         QList<QStandardItem*> rootItems;
-        rootItems << new QStandardItem(QString("Brand Alpha").arg(i));;
-
+        rootItems << new QStandardItem(QString("Brand Alpha").arg(i));
 
         int total = 0;
         for(int j = 0; j < 10; ++j)
         {
             int rand = qrand()%10+1;
             QStandardItem* child1 = new QStandardItem();
-            child1->setData(QVariant::fromValue(CProgressItem(rand)), Qt::DisplayRole);
-            child1->setData(QString("%1%").arg(rand), Qt::UserRole);
+            child1->setData(QVariant::fromValue(CProgressItem(rand, QString("%1%").arg(rand))), Qt::DisplayRole);
             child1->setData(rand, CellValue);
 
             QStandardItem* child2 = new QStandardItem();
@@ -69,12 +168,9 @@ MainWindow::MainWindow(QWidget *parent) :
                               child2);
             total += rand;
         }
-
         rootItems << new QStandardItem();
-        rootItems.last()->setData(QVariant::fromValue(CProgressItem(total)), Qt::DisplayRole);
-        rootItems.last()->setData(QString("%1%").arg(total), Qt::UserRole);
+        rootItems.last()->setData(QVariant::fromValue(CProgressItem(total, QString("%1%").arg(total))), Qt::DisplayRole);
         rootItems << new QStandardItem(QString("%1%").arg(total));
-
         rootItems << new QStandardItem(QString("%1%").arg(total));
         rootItems << new QStandardItem(QString("%1%").arg(total));
         rootItems << new QStandardItem(QString("%1%").arg(total));
@@ -82,14 +178,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
         _model->appendRow(rootItems);
     }
+#endif
     ui->treeView_1->setModel(_model);
     ui->treeView_1->setItemDelegate(new CCheckBoxDelegate);
     ui->treeView_2->setModel(_model);
     ui->treeView_2->setItemDelegate(new CProgressDelegate);
     for(int i = 0; i < ui->treeView_1->model()->columnCount(); ++i)
         ui->treeView_1->hideColumn(i);
-    ui->treeView_1->showColumn(6);
-    ui->treeView_2->hideColumn(6);
+    ui->treeView_1->showColumn(_model->columnCount()-1);
+    ui->treeView_2->hideColumn(_model->columnCount()-1);
 
     connect(ui->treeView_1, SIGNAL(clicked(QModelIndex)), SLOT(onCheckBoxClicked(QModelIndex)));
     connect(ui->treeView_2->verticalScrollBar(), SIGNAL(valueChanged(int)),
@@ -141,41 +238,28 @@ void MainWindow::onCheckBoxClicked(const QModelIndex &model)
     for(int col = 1; col <= 5; ++col)
     {
         qint32 total = 0;
-        if(checked)
+        qint32 rand = 0;
+        if(!checked)
+            rand = (qrand()%10 + 1);
+
+        _model->setData(parentModel.child(model.row(), col), rand, CellValue);
+        if(col == 1)
         {
-            _model->setData(parentModel.child(model.row(), col), 0, CellValue);
-            if(col == 1)
-            {
-                _model->setData(parentModel.child(model.row(), col),QVariant::fromValue(CProgressItem(0)), Qt::DisplayRole);
-                _model->setData(parentModel.child(model.row(), col),QString("%1%").arg(0), Qt::UserRole);
-            }
-            else
-            {
-                _model->setData(parentModel.child(model.row(), col), QString("%1%").arg(0));
-            }
+            _model->setData(parentModel.child(model.row(), col), QVariant::fromValue(CProgressItem(rand, QString("%1%").arg(rand))), Qt::DisplayRole);
         }
         else
         {
-            qint32 rand = (qrand()%10 + 1);
-            if(col == 1)
-            {
-                _model->setData(parentModel.child(model.row(), col),QString("%1%").arg(rand), Qt::UserRole);
-                _model->setData(parentModel.child(model.row(), col),QVariant::fromValue(CProgressItem(rand)), Qt::DisplayRole);
-            }
-            else
-            {
-                _model->setData(parentModel.child(model.row(), col), QString("%1%").arg(rand));
-            }
-            _model->setData(parentModel.child(model.row(), col), rand, CellValue);
+            _model->setData(parentModel.child(model.row(), col), QString("%1%").arg(rand));
         }
+
         for(int row = 0; row < 10; ++row)
         {
             total += parentModel.child(row, col).data(CellValue).toInt();
         }
+
         if(col == 1)
         {
-            _model->setData(_model->index(parentModel.row(), col), QString("%1%").arg(total), Qt::UserRole);
-            _model->setData(_model->index(parentModel.row(), col),QVariant::fromValue(CProgressItem(total)), Qt::DisplayRole);
+            _model->setData(_model->index(parentModel.row(), col), QVariant::fromValue(CProgressItem(total, QString("%1%").arg(total))), Qt::DisplayRole);
         }
         else
         {

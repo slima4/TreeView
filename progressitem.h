@@ -7,14 +7,18 @@ class CProgressItem
 {
 public:
     CProgressItem();
-    CProgressItem(int value) :
-        _value(value)
+    CProgressItem(int value, const QString &text) :
+        _value(value),
+        _text(text)
     {}
 
     int value() { return _value; }
 
+    QString text() {return _text; }
+
 private:
     int _value;
+    QString _text;
 };
 
 Q_DECLARE_METATYPE(CProgressItem)

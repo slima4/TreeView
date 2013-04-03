@@ -21,16 +21,15 @@ void CProgressDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 {
     if (index.data().canConvert<CProgressItem>())
     {
-        QString text = index.data(Qt::UserRole).toString();
+        CProgressItem progress = qvariant_cast<CProgressItem>(index.data());
+
         QRect textRect(option.rect);
         textRect.adjust(textRect.width() + TEXT_POS,0,0,0);
-        painter->drawText(textRect, text);
+        painter->drawText(textRect, progress.text());
 
-        CProgressItem progress = qvariant_cast<CProgressItem>(index.data());
         QRect progressBarRect(option.rect);
         progressBarRect.adjust(0,0,TEXT_POS-5,0);
         QRect buttonRect(progressBarRect);
-        buttonRect.setHeight( 30);
         QStyleOptionProgressBar button;
         button.rect = buttonRect;
         button.state = QStyle::State_Enabled;
