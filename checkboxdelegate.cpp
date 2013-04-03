@@ -17,7 +17,7 @@ void CCheckBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         button.rect = option.rect;
         button.state |= QStyle::State_Enabled;
         bool checked = index.data(Qt::UserRole).toBool();
-        button.state |= checked?QStyle::State_On:QStyle::State_Off;
+        button.state |= checked ? QStyle::State_On : QStyle::State_Off;
 
         QApplication::style()->drawControl(QStyle::CE_CheckBox, &button, painter);
     } else {

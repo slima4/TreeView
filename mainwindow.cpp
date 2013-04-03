@@ -146,6 +146,7 @@ void MainWindow::onCheckBoxClicked(const QModelIndex &model)
             _model->setData(parentModel.child(model.row(), col), 0, CellValue);
             if(col == 1)
             {
+                _model->setData(parentModel.child(model.row(), col),QVariant::fromValue(CProgressItem(0)), Qt::DisplayRole);
                 _model->setData(parentModel.child(model.row(), col),QString("%1%").arg(0), Qt::UserRole);
             }
             else
@@ -159,6 +160,7 @@ void MainWindow::onCheckBoxClicked(const QModelIndex &model)
             if(col == 1)
             {
                 _model->setData(parentModel.child(model.row(), col),QString("%1%").arg(rand), Qt::UserRole);
+                _model->setData(parentModel.child(model.row(), col),QVariant::fromValue(CProgressItem(rand)), Qt::DisplayRole);
             }
             else
             {
@@ -173,6 +175,7 @@ void MainWindow::onCheckBoxClicked(const QModelIndex &model)
         if(col == 1)
         {
             _model->setData(_model->index(parentModel.row(), col), QString("%1%").arg(total), Qt::UserRole);
+            _model->setData(_model->index(parentModel.row(), col),QVariant::fromValue(CProgressItem(total)), Qt::DisplayRole);
         }
         else
         {
