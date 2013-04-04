@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-#ifdef NEW_MODEL
+#ifndef NEW_MODEL
     QList<QStringList> lines;
     QFile file("db/SampleProjectDataset_1.csv");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -77,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
+
     QString currentName;
     for(int i = OFFSET_COLUMN_BEGIT; i < ROWS_COUNT + OFFSET_COLUMN_BEGIT; ++i)
     {
@@ -87,43 +88,54 @@ MainWindow::MainWindow(QWidget *parent) :
             currentName = groupMap[lines.at(i).at(GROUP_COLUMN)];
             rootItems << new QStandardItem(currentName);
         }
-        int total = 0;
+        QMap<int,double> totalMap;
         // add CHILD
         while (i < lines.count() && currentName.compare(groupMap[lines.at(i).at(GROUP_COLUMN)], Qt::CaseSensitive) == 0)
         {
-            QStandardItem* child1 = new QStandardItem();
+            QList<QStandardItem*> items;
+            QStandardItem* item;
+
+            items << new QStandardItem(lines.at(i).at(GROUP_COLUMN + 1));
+
+            item = new QStandardItem();
             double value = lines.at(i).at(GROUP_COLUMN + 2).toDouble() * 100;
-            child1->setData(QVariant::fromValue(CProgressItem(value, QString("%1%").arg(QString::number(value, 'g', 2)))), Qt::DisplayRole);
-            child1->setData(value, CellValue);
-
-            QStandardItem* child2 = new QStandardItem();
-            child2->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
-            child2->setData(true, Qt::UserRole);
+            totalMap[0] += value;
+            item->setData(QVariant::fromValue(CProgressItem(value, QString("%1%").arg(QString::number(value, 'f', 2)))), Qt::DisplayRole);
+            item->setData(value, CellValue);
+            items << item;
 
 
-            QStandardItem *item1 = new QStandardItem(lines.at(i).at(GROUP_COLUMN + 1));
-
-            QList<QStandardItem*> rows;
-            rows << item1;
-            rows << child1;
-            for(int k = 3; k < 15; ++k)
+            for(int k = 3; k < 7; ++k)
             {
                 value = lines.at(i).at(GROUP_COLUMN + k).toDouble() * 100;
-                QStandardItem *item2 = new QStandardItem(QString("%1%").arg(QString::number(value, 'g', 2)));
-                item2->setData(value, CellValue);
-                rows << item2;
+                totalMap[k-2] += value;
+                item = new QStandardItem(QString("%1%").arg(QString::number(value, 'f', 2)));
+                item->setData(value, CellValue);
+                items << item;
             }
-            rows << child2;
-            rootItems.first()->appendRow(rows);
-            total += 1;
+            for(int k = 7; k < 15; ++k)
+            {
+                value = lines.at(i).at(GROUP_COLUMN + k).toDouble()/* * 100*/;
+                item = new QStandardItem(QString("%1%").arg(QString::number(value, 'f', 2)));
+                item->setData(value, CellValue);
+                items << item;
+            }
+
+            item = new QStandardItem();
+            item->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
+            item->setData(true, Qt::UserRole);
+            items << item;
+
+            rootItems.first()->appendRow(items);
             ++i;
-        }
+        };
+        --i;
         rootItems << new QStandardItem();
-        rootItems.last()->setData(QVariant::fromValue(CProgressItem(total, QString("%1%").arg(total))), Qt::DisplayRole);
-        rootItems << new QStandardItem(QString("%1%").arg(total));
-        rootItems << new QStandardItem(QString("%1%").arg(total));
-        rootItems << new QStandardItem(QString("%1%").arg(total));
-        rootItems << new QStandardItem(QString("%1%").arg(total));
+        rootItems.last()->setData(QVariant::fromValue(CProgressItem(totalMap[0], QString("%1%").arg(QString::number(totalMap[0], 'f', 2)))), Qt::DisplayRole);
+        rootItems << new QStandardItem(QString("%1%").arg(QString::number(totalMap[1], 'f', 2)));
+        rootItems << new QStandardItem(QString("%1%").arg(QString::number(totalMap[2], 'f', 2)));
+        rootItems << new QStandardItem(QString("%1%").arg(QString::number(totalMap[3], 'f', 2)));
+        rootItems << new QStandardItem(QString("%1%").arg(QString::number(totalMap[4], 'f', 2)));
         rootItems << new QStandardItem();
         _model->appendRow(rootItems);
     }
@@ -187,6 +199,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->treeView_1->hideColumn(i);
     ui->treeView_1->showColumn(_model->columnCount()-1);
     ui->treeView_2->hideColumn(_model->columnCount()-1);
+    ui->treeView_2->resizeColumnToContents(0);
 
     connect(ui->treeView_1, SIGNAL(clicked(QModelIndex)), SLOT(onCheckBoxClicked(QModelIndex)));
     connect(ui->treeView_2->verticalScrollBar(), SIGNAL(valueChanged(int)),
