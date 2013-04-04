@@ -25,6 +25,17 @@ public slots:
     void onExpanded(const QModelIndex &);
     void onCollapsed(const QModelIndex &);
     void onCheckBoxClicked(const QModelIndex &);
+
+    void onRbGroceryToggled(bool);
+    void onRbMassRetailerToggled(bool);
+    void onRbClubStoreToggled(bool);
+
+    void onRbConceptAToggled(bool);
+    void onRbConceptBToggled(bool);
+
+    void onRb12ozToggled(bool);
+    void onRb16ozToggled(bool);
+    void onRb2x16ozToggled(bool);
     
 private:
     Ui::MainWindow *ui;

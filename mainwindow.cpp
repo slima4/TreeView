@@ -79,43 +79,58 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     QString currentName;
-    for(int i = OFFSET_COLUMN_BEGIT; i < ROWS_COUNT + OFFSET_COLUMN_BEGIT; ++i)
+    for(int row = OFFSET_COLUMN_BEGIT; row < ROWS_COUNT + OFFSET_COLUMN_BEGIT; ++row)
     {
         // add ROOT
         QList<QStandardItem*> rootItems;
-        if(currentName.compare(groupMap[lines.at(i).at(GROUP_COLUMN)], Qt::CaseSensitive) != 0)
+        if(currentName.compare(groupMap[lines.at(row).at(GROUP_COLUMN)], Qt::CaseSensitive) != 0)
         {
-            currentName = groupMap[lines.at(i).at(GROUP_COLUMN)];
+            currentName = groupMap[lines.at(row).at(GROUP_COLUMN)];
             rootItems << new QStandardItem(currentName);
         }
-        QMap<int,double> totalMap;
         // add CHILD
-        while (i < lines.count() && currentName.compare(groupMap[lines.at(i).at(GROUP_COLUMN)], Qt::CaseSensitive) == 0)
+        QMap<int,double> totalMap;
+        while (row < lines.count() && currentName.compare(groupMap[lines.at(row).at(GROUP_COLUMN)], Qt::CaseSensitive) == 0)
         {
+            bool ok;
+            double value = 0;
+            QString valueStr;
+            QStringList line(lines.at(row));
+            int totalSumRow = 0;
             QList<QStandardItem*> items;
             QStandardItem* item;
 
-            items << new QStandardItem(lines.at(i).at(GROUP_COLUMN + 1));
+            items << new QStandardItem(line.at(GROUP_COLUMN + 1));
 
             item = new QStandardItem();
-            double value = lines.at(i).at(GROUP_COLUMN + 2).toDouble() * 100;
+            value = line.at(GROUP_COLUMN + 2).toDouble(&ok) * 100;
+            if(ok)
+                valueStr = QString("%1%").arg(QString::number(value, 'f', 2));
+            else
+                valueStr = line.at(GROUP_COLUMN + 2);
+            item->setData(QVariant::fromValue(CProgressItem(value, valueStr)), Qt::DisplayRole);
             totalMap[0] += value;
-            item->setData(QVariant::fromValue(CProgressItem(value, QString("%1%").arg(QString::number(value, 'f', 2)))), Qt::DisplayRole);
+            totalSumRow += value*100;
             item->setData(value, CellValue);
             items << item;
 
-
-            for(int k = 3; k < 7; ++k)
+            for(int k = 3; k < 7; ++k) // main columns
             {
-                value = lines.at(i).at(GROUP_COLUMN + k).toDouble() * 100;
+                value = line.at(GROUP_COLUMN + k).toDouble(&ok) * 100;
                 totalMap[k-2] += value;
-                item = new QStandardItem(QString("%1%").arg(QString::number(value, 'f', 2)));
+                totalSumRow += value*100;
+                if(ok)
+                    valueStr = QString("%1%").arg(QString::number(value, 'f', 2));
+                else
+                    valueStr = line.at(GROUP_COLUMN + k);
+                item = new QStandardItem(valueStr);
                 item->setData(value, CellValue);
                 items << item;
             }
-            for(int k = 7; k < 15; ++k)
+
+            for(int k = 7; k < 15; ++k) // additional columns
             {
-                value = lines.at(i).at(GROUP_COLUMN + k).toDouble()/* * 100*/;
+                value = line.at(GROUP_COLUMN + k).toDouble();
                 item = new QStandardItem(QString("%1%").arg(QString::number(value, 'f', 2)));
                 item->setData(value, CellValue);
                 items << item;
@@ -123,13 +138,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
             item = new QStandardItem();
             item->setData(QVariant::fromValue(CCheckBoxItem()), Qt::DisplayRole);
-            item->setData(true, Qt::UserRole);
+            item->setData(totalSumRow <= 0?false:true, Qt::UserRole);
             items << item;
 
             rootItems.first()->appendRow(items);
-            ++i;
+            ++row;
         };
-        --i;
+        --row;
         rootItems << new QStandardItem();
         rootItems.last()->setData(QVariant::fromValue(CProgressItem(totalMap[0], QString("%1%").arg(QString::number(totalMap[0], 'f', 2)))), Qt::DisplayRole);
         rootItems << new QStandardItem(QString("%1%").arg(QString::number(totalMap[1], 'f', 2)));
@@ -197,11 +212,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView_2->setItemDelegate(new CProgressDelegate);
     for(int i = 0; i < ui->treeView_1->model()->columnCount(); ++i)
         ui->treeView_1->hideColumn(i);
+    for(int i = 6; i < ui->treeView_2->model()->columnCount(); ++i)
+        ui->treeView_2->hideColumn(i);
     ui->treeView_1->showColumn(_model->columnCount()-1);
     ui->treeView_2->hideColumn(_model->columnCount()-1);
     ui->treeView_2->resizeColumnToContents(0);
+//    int rrr = _model->rowCount();
 
-    connect(ui->treeView_1, SIGNAL(clicked(QModelIndex)), SLOT(onCheckBoxClicked(QModelIndex)));
+//    for(int i = 0; i < _model->rowCount(); ++i)
+//    {
+//        QStandardItem *itemChild = _model->item(i);
+
+//        QMap<int,double> totalMap;
+//        double coef = itemChild->child(i, 6)->data(CellValue).toDouble();
+//        bool ok;
+//        QString valueStr;
+//        for(int j = 1; j < 6; ++j)
+//        {
+//            QStandardItem *item = itemChild->child(i, j);
+//            double value = item->data(CellValue).toDouble(&ok) * coef;
+//            totalMap[j] += value;
+//            if(ok)
+//                valueStr = QString("%1%").arg(QString::number(value, 'f', 2));
+//            else
+//                valueStr = "--";
+//            item->setData(valueStr, Qt::DisplayRole);
+//            item->setData(value, CellValue);
+//        }
+//    }
+
+    //connect(ui->treeView_1, SIGNAL(clicked(QModelIndex)), SLOT(onCheckBoxClicked(QModelIndex)));
     connect(ui->treeView_2->verticalScrollBar(), SIGNAL(valueChanged(int)),
             ui->treeView_1->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->treeView_1->verticalScrollBar(), SIGNAL(valueChanged(int)),
@@ -214,6 +254,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView_2->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->treeView_2->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->treeView_1->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+    connect(ui->rbGrocery, SIGNAL(toggled(bool)), SLOT(onRbGroceryToggled(bool)));
+    connect(ui->rbMassRetailer, SIGNAL(toggled(bool)), SLOT(onRbMassRetailerToggled(bool)));
+    connect(ui->rbClubStore, SIGNAL(toggled(bool)), SLOT(onRbClubStoreToggled(bool)));
+
+    connect(ui->rbConceptA, SIGNAL(toggled(bool)), SLOT(onRbConceptAToggled(bool)));
+    connect(ui->rbConceptB, SIGNAL(toggled(bool)), SLOT(onRbConceptBToggled(bool)));
+
+    connect(ui->rb12oz, SIGNAL(toggled(bool)), SLOT(onRb12ozToggled(bool)));
+    connect(ui->rb16oz, SIGNAL(toggled(bool)), SLOT(onRb16ozToggled(bool)));
+    connect(ui->rb2x16oz, SIGNAL(toggled(bool)), SLOT(onRb2x16ozToggled(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -239,6 +290,46 @@ void MainWindow::onExpanded(const QModelIndex &model)
 void MainWindow::onCollapsed(const QModelIndex &model)
 {
     ui->treeView_1->collapse(model);
+}
+
+void MainWindow::onRbGroceryToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRbMassRetailerToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRbClubStoreToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRbConceptAToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRbConceptBToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRb12ozToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRb16ozToggled(bool toggled)
+{
+
+}
+
+void MainWindow::onRb2x16ozToggled(bool toggled)
+{
+
 }
 
 void MainWindow::onCheckBoxClicked(const QModelIndex &model)
