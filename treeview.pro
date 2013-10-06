@@ -17,8 +17,7 @@ SOURCES += main.cpp\
     itemmodel.cpp \
     checkboxdelegate.cpp \
     progressdelegate.cpp \
-    checkboxitem.cpp \
-    progressitem.cpp
+    checkboxitem.cpp
 
 HEADERS  += mainwindow.h \
     itemmodel.h \

@@ -2,23 +2,28 @@
 #define PROGRESSITEM_H
 
 #include <QMetaType>
+#include <QString>
 
 class CProgressItem
 {
 public:
-    CProgressItem();
-    CProgressItem(int value, const QString &text) :
-        _value(value),
-        _text(text)
+    CProgressItem() :
+        _value(0),
+        _textValue(QString())
     {}
 
-    int value() { return _value; }
+    CProgressItem(int value, const QString &text) :
+        _value(value),
+        _textValue(text)
+    {}
 
-    QString text() {return _text; }
+    int value() const { return _value; }
+
+    QString text() const {return _textValue; }
 
 private:
     int _value;
-    QString _text;
+    QString _textValue;
 };
 
 Q_DECLARE_METATYPE(CProgressItem)

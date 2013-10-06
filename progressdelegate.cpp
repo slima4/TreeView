@@ -8,7 +8,6 @@
 #include <QStandardItem>
 
 namespace {
-    const int PaintingScaleFactor = 20;
     const int TEXT_POS = -45;
 }
 CProgressDelegate::CProgressDelegate(QObject *parent)

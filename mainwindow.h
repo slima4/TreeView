@@ -12,12 +12,24 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    enum EColumn {
+        EColumnBrand = 0,
+        EColumnTatal = 1,
+        EColumnNortheast = 2,
+        EColumnSoutheast = 3,
+        EColumnMidwest = 4,
+        EColumnWest = 5,
+        EColumnCheckBox = 6,
+
+        EColumnCount
+    };
     
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    static const int CellValue = Qt::UserRole + 100;
+    static const int CELL_VALUE = Qt::UserRole + 100;
 
 public slots:
     void setValue(int);
